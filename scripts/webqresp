@@ -2,19 +2,20 @@
 
 #### measure
 
-def measure(url, response_seconds=1):
-    return 42
+def measure(url, header=None, post=None, response_seconds=1):
+
+    from requests import request
+    requests = []
+
+    return len(requests)
 
 #### main
 
 def main():
 
-    #### import
-
-    from argparse import ArgumentParser, RawTextHelpFormatter
-
     #### parse command line arguments
 
+    from argparse import ArgumentParser, RawTextHelpFormatter
     args_parser = ArgumentParser(
         description='Web load test measuring how many concurrent users will get response to their actions quickly - within a second.',
         epilog='''
@@ -29,15 +30,19 @@ MIT License, see http://opensource.org/licenses/MIT
         formatter_class=RawTextHelpFormatter,
     )
     args_parser.add_argument('url', help='URL to test, e.g. http://example.com/some/page')
-    args_parser.add_argument('-s', '--response-seconds', type=int, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
+    args_parser.add_argument('--header', action='append', help='Additional headers, e.g. "X-Name: Value".')
+    args_parser.add_argument('--post', help='String to POST, e.g. "name=value". Default: GET request.')
+    args_parser.add_argument('--response-seconds', type=int, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
     args = args_parser.parse_args()
 
-    url = args.url
-    response_seconds = args.response_seconds
+    #### become cooperative
+
+    import gevent.monkey
+    gevent.monkey.patch_all()
 
     #### measure
 
-    print(measure(url, response_seconds=response_seconds))
+    print(measure(**vars(args)))
 
 if __name__ == '__main__':
     main()
