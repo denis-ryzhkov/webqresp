@@ -2,12 +2,30 @@
 
 #### measure
 
-def measure(url, header=None, post=None, response_seconds=1):
+def measure(response_seconds=1, header=None, content=None, method='GET', url=None):
 
+    import gevent
     from requests import request
-    requests = []
 
-    return len(requests)
+    headers = dict()
+    for name_value in (header or ()):
+        try:
+            name, value = name_value.split(':', 1)
+        except ValueError:
+            exit("Invalid header: '{header}'".format(header=name_value))
+        headers[name] = value
+
+    def worker():
+        response = request(headers=headers, data=content, method=method, url=url)
+        # response.ok
+        return response.text
+
+    workers = []
+    workers.append(gevent.spawn(worker))
+    gevent.joinall(workers)
+    print([worker.get() for worker in workers])
+
+    return len(workers)
 
 #### main
 
@@ -29,10 +47,11 @@ MIT License, see http://opensource.org/licenses/MIT
 ''',
         formatter_class=RawTextHelpFormatter,
     )
+    args_parser.add_argument('--response-seconds', type=float, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
+    args_parser.add_argument('--header', action='append', help="Additional headers, e.g. --header='Content-Type: application/json' --header='X-Name: Value'.")
+    args_parser.add_argument('--content', help='''Content for POST, etc. E.g. 'name1=value1&name2=value2' or '{"name1": "value1", "name2": "value2"}'.''')
+    args_parser.add_argument('--method', default='GET', help='HTTP Method. Default: GET.')
     args_parser.add_argument('url', help='URL to test, e.g. http://example.com/some/page')
-    args_parser.add_argument('--header', action='append', help='Additional headers, e.g. "X-Name: Value".')
-    args_parser.add_argument('--post', help='String to POST, e.g. "name=value". Default: GET request.')
-    args_parser.add_argument('--response-seconds', type=int, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
     args = args_parser.parse_args()
 
     #### become cooperative

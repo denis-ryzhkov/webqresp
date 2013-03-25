@@ -10,7 +10,7 @@ setup(
 Usage::
 
     webqresp http://example.com/
-    webqresp --header="X-Name: Value" --post="name=value" --response-seconds=0.5 http://example.com/
+    webqresp --response-seconds=0.5 --header='X-Name: Value' --content='{"name": "value"}' --method=POST http://example.com/some/page
 
 Criterion:
 
