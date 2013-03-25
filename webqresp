@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+#### measure
+
+def measure(url, response_seconds=1):
+    return 42
+
+#### main
+
+def main():
+
+    #### import
+
+    from argparse import ArgumentParser, RawTextHelpFormatter
+
+    #### parse command line arguments
+
+    args_parser = ArgumentParser(
+        description='Web load test measuring how many concurrent users will get response to their actions quickly - within a second.',
+        epilog='''
+Criterion:
+    Maximal number of concurrent requests to the slowest URL
+    while each request gets successful response within a second.
+
+webqresp version 0.1.0
+Copyright (C) 2013 by Denis Ryzhkov <denisr@denisr.com>
+MIT License, see http://opensource.org/licenses/MIT
+''',
+        formatter_class=RawTextHelpFormatter,
+    )
+    args_parser.add_argument('url', help='URL to test, e.g. http://example.com/some/page')
+    args_parser.add_argument('-s', '--response-seconds', type=int, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
+    args = args_parser.parse_args()
+
+    url = args.url
+    response_seconds = args.response_seconds
+
+    #### measure
+
+    print(measure(url, response_seconds=response_seconds))
+
+if __name__ == '__main__':
+    main()
