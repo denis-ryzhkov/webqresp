@@ -15,28 +15,38 @@ def measure(response_seconds=1, header=None, content=None, method='GET', url=Non
             exit("Invalid header: '{header}'".format(header=name_value))
         headers[name] = value
 
-    def worker():
+    def task():
         start = time.time()
+        #print(start)
         response = request(headers=headers, data=content, method=method, url=url)
         response.content # Time content transmition too.
         this_response_seconds = time.time() - start
+        #print(this_response_seconds)
         is_success = response.ok
         is_quick = (this_response_seconds <= response_seconds)
         if is_success and is_quick:
             return True
         else:
+            errors = []
             if not is_success:
-                print('Failed: {status_code} {reason}, {content}'.format(status_code=response.status_code, reason=response.reason, content=response.content))
+                errors.append('Failed: {status_code} {reason}, {content}'.format(status_code=response.status_code, reason=response.reason, content=response.content))
             if not is_quick:
-                print('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
-            return False
+                errors.append('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
+            return '\n'.join(errors)
 
-    workers = []
-    workers.append(gevent.spawn(worker))
-    gevent.joinall(workers)
-    print([worker.get() for worker in workers])
-
-    return len(workers)
+    concurrency = 0
+    ok = True
+    while ok:
+        concurrency += 1
+        print(concurrency)
+        workers = [gevent.spawn(task) for _ in xrange(concurrency)]
+        gevent.joinall(workers)
+        for worker in workers:
+            result = worker.get()
+            if result == True:
+                continue
+            print(result)
+            ok = False
 
 #### main
 
@@ -72,7 +82,7 @@ MIT License, see http://opensource.org/licenses/MIT
 
     #### measure
 
-    print(measure(**vars(args)))
+    measure(**vars(args))
 
 if __name__ == '__main__':
     main()
