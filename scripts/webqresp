@@ -4,7 +4,7 @@
 
 def measure(response_seconds=1, header=None, content=None, method='GET', url=None):
 
-    import gevent
+    import gevent, time
     from requests import request
 
     headers = dict()
@@ -16,9 +16,20 @@ def measure(response_seconds=1, header=None, content=None, method='GET', url=Non
         headers[name] = value
 
     def worker():
+        start = time.time()
         response = request(headers=headers, data=content, method=method, url=url)
-        # response.ok
-        return response.text
+        response.content # Time content transmition too.
+        this_response_seconds = time.time() - start
+        is_success = response.ok
+        is_quick = (this_response_seconds <= response_seconds)
+        if is_success and is_quick:
+            return True
+        else:
+            if not is_success:
+                print('Failed: {status_code} {reason}, {content}'.format(status_code=response.status_code, reason=response.reason, content=response.content))
+            if not is_quick:
+                print('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
+            return False
 
     workers = []
     workers.append(gevent.spawn(worker))
