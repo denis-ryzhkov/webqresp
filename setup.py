@@ -1,22 +1,25 @@
-webqresp
-========
+# -*- coding: utf-8 -*-
 
-Web load test measuring how many concurrent users will get response to their actions quickly - within a second.
+from distutils.core import setup
 
-Usage:
-```
+setup(
+    name='webqresp',
+    version='0.1.0',
+    description='Web load test measuring how many concurrent users will get response to their actions quickly - within a second.',
+    long_description='''
+Usage::
+
     webqresp http://example.com/
     webqresp --response-seconds=0.5 http://example.com/
-```
 
 Criterion:
 
-> Maximal number of concurrent requests to the slowest URL
-> while each request gets successful response within a second.
+    Maximal number of concurrent requests to the slowest URL
+    while each request gets successful response within a second.
 
 Why:
 
-* Popular criterion Requests Per Second (RPS, req/s) has a great flaw of being confusing when comparing measurement before and after optimization. Please see [explanation](http://www.therailsway.com/2009/1/6/requests-per-second/).
+* Popular criterion Requests Per Second (RPS, req/s) has a great flaw of being confusing when comparing measurement before and after optimization. Please see `explanation <http://www.therailsway.com/2009/1/6/requests-per-second/>`_.
 * Another criterion - Milliseconds Per Request (ms/req) calculated as 1000/(req/s) as proposed in the article above also has flaws:
     * It shows real response duration experienced by a user only when requests are sent sequentially, not concurrently:
         * Let's take 100,000 requests and send them to a server in a sequence, waiting for each response before sending the next request. If server processes all this in 10 seconds, it is giving 10,000 req/s, and each request gets response in 0.1 ms - great!
@@ -30,6 +33,21 @@ Why:
 * Single slowest URL is chosen to save time configuring the tool, because anyway "A chain is only as strong as its weakest link".
 * You may adjust default response time of 1 second to a time required for your product.
 
-webqresp version 0.1.0  
-Copyright (C) 2013 by Denis Ryzhkov <denisr@denisr.com>  
-MIT License, see http://opensource.org/licenses/MIT
+''',
+    url='https://github.com/denis-ryzhkov/webqresp',
+    author='Denis Ryzhkov',
+    author_email='denisr@denisr.com',
+    license='MIT',
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2.7',
+        'Topic :: Software Development :: Testing :: Traffic Generation',
+    ],
+    scripts=['scripts/webqresp'],
+    install_requires=[
+        'gevent',
+        'requests',
+    ],
+)
