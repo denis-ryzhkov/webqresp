@@ -2,7 +2,7 @@
 
 #### measure
 
-def measure(response_seconds=1, header=None, content=None, method='GET', url=None):
+def measure(start=1, response_seconds=1, header=None, content=None, method='GET', url=None):
 
     #### import
 
@@ -30,7 +30,7 @@ def measure(response_seconds=1, header=None, content=None, method='GET', url=Non
 
     #### increment concurrency
 
-    concurrency = 0
+    concurrency = start - 1
     ok = True
     while ok:
         concurrency += 1
@@ -86,7 +86,8 @@ MIT License, see http://opensource.org/licenses/MIT
 ''',
         formatter_class=RawTextHelpFormatter,
     )
-    args_parser.add_argument('--response-seconds', type=float, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1 second.')
+    args_parser.add_argument('--start', type=int, default=1, help='Number of concurrent requests to start with. Default: 1.')
+    args_parser.add_argument('--response-seconds', type=float, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1.')
     args_parser.add_argument('--header', action='append', help="Additional headers, e.g. --header='Content-Type: application/json' --header='X-Name: Value'.")
     args_parser.add_argument('--content', help='''Content for POST, etc. E.g. 'name1=value1&name2=value2' or '{"name1": "value1", "name2": "value2"}'.''')
     args_parser.add_argument('--method', default='GET', help='HTTP Method. Default: GET.')
