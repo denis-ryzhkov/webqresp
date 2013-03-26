@@ -27,8 +27,7 @@ Why:
 * Our criterion is constructed so that:
     * It cares about real response duration for each user in the worst concurrent case.
     * It is not a proportion. It is not ambiguous. Once 1 second is reached or failure occurs, it stops incrementing concurrent requests and returns the result.
-* Single slowest URL is chosen to save time configuring the tool, because anyway "A chain is only as strong as its weakest link".
-* You may adjust default response time of 1 second to a time required for your product.
+* Single slowest URL is chosen to save time, because anyway "A chain is only as strong as its weakest link".
 
 webqresp version 0.1.0  
 Copyright (C) 2013 by Denis Ryzhkov <denisr@denisr.com>  

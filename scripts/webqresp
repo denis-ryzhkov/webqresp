@@ -4,8 +4,12 @@
 
 def measure(response_seconds=1, header=None, content=None, method='GET', url=None):
 
+    #### import
+
     import gevent, time
     from requests import request
+
+    #### headers
 
     headers = dict()
     for name_value in (header or ()):
@@ -15,38 +19,52 @@ def measure(response_seconds=1, header=None, content=None, method='GET', url=Non
             exit("Invalid header: '{header}'".format(header=name_value))
         headers[name] = value
 
+    #### task
+
     def task():
         start = time.time()
-        #print(start)
         response = request(headers=headers, data=content, method=method, url=url)
         response.content # Time content transmition too.
         this_response_seconds = time.time() - start
-        #print(this_response_seconds)
-        is_success = response.ok
-        is_quick = (this_response_seconds <= response_seconds)
-        if is_success and is_quick:
-            return True
-        else:
-            errors = []
-            if not is_success:
-                errors.append('Failed: {status_code} {reason}, {content}'.format(status_code=response.status_code, reason=response.reason, content=response.content))
-            if not is_quick:
-                errors.append('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
-            return '\n'.join(errors)
+        return (response, this_response_seconds)
+
+    #### increment concurrency
 
     concurrency = 0
     ok = True
     while ok:
         concurrency += 1
         print(concurrency)
+
+        #### concurrent fetch
+
         workers = [gevent.spawn(task) for _ in xrange(concurrency)]
         gevent.joinall(workers)
+
+        #### process results
+
         for worker in workers:
-            result = worker.get()
-            if result == True:
+
+            response, this_response_seconds = worker.get()
+            is_success = response.ok
+            is_quick = (this_response_seconds <= response_seconds)
+
+            #### ok
+
+            if is_success and is_quick:
                 continue
-            print(result)
+
+            #### not ok
+
+            if not is_quick:
+                print('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
+
+            if not is_success:
+                print('Failed: {status_code} {reason}'.format(status_code=response.status_code, reason=response.reason))
+                print(response.content)
+
             ok = False
+            break
 
 #### main
 
