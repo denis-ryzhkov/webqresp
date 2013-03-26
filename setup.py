@@ -7,8 +7,11 @@ setup(
     version='0.1.0',
     description='Web load test measuring how many concurrent users will get response to their actions quickly - within a second.',
     long_description='''
+Hence name: WEB Quick RESPonse.
+
 Usage::
 
+    sudo pip install webqresp
     webqresp http://example.com/
     webqresp --repeat=3 --start=5 --response-seconds=0.5 --header='X-Name: Value' --content='{"name": "value"}' --method=POST http://example.com/some/page
 

@@ -103,7 +103,9 @@ def main():
 
     from argparse import ArgumentParser, RawTextHelpFormatter
     args_parser = ArgumentParser(
-        description='Web load test measuring how many concurrent users will get response to their actions quickly - within a second.',
+        description='''Web load test measuring how many concurrent users will get response to their actions quickly - within a second.
+Hence name: WEB Quick RESPonse.
+''',
         epilog='''
 Criterion:
     Maximal number of concurrent requests to the slowest URL
