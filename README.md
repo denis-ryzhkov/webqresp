@@ -6,8 +6,16 @@ Web load test measuring how many concurrent users will get response to their act
 Usage:
 ```
     webqresp http://example.com/
-    webqresp --start=5 --response-seconds=0.5 --header='X-Name: Value' --content='{"name": "value"}' --method=POST http://example.com/some/page
+    webqresp --repeat=3 --start=5 --response-seconds=0.5 --header='X-Name: Value' --content='{"name": "value"}' --method=POST http://example.com/some/page
 ```
+
+* `--repeat` - Number of times to repeat the test, showing aggregated stats in the end. Default: `1`.
+* `--start` - Number of concurrent requests to start with. Default: `1`.
+* `--response-seconds` - Maximal response time in seconds for each request to pass the test. Default: `1`.
+* `--header` - Additional headers, e.g. `--header='Content-Type: application/json' --header='X-Name: Value'`.
+* `--content` - Content for `POST`, etc. E.g. `'name1=value1&name2=value2'` or `'{"name1": "value1", "name2": "value2"}'`.
+* `--method` - HTTP Method. Default: `GET`.
+* `url` - URL to test, e.g. `http://example.com/some/page`.
 
 Criterion:
 

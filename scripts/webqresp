@@ -2,12 +2,14 @@
 
 #### measure
 
-def measure(start=1, response_seconds=1, header=None, content=None, method='GET', url=None):
+def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, method='GET', url=None):
 
     #### import
 
     import gevent, time
+    from math import ceil
     from requests import request
+    from traceback import print_exc
 
     #### headers
 
@@ -28,43 +30,70 @@ def measure(start=1, response_seconds=1, header=None, content=None, method='GET'
         this_response_seconds = time.time() - start
         return (response, this_response_seconds)
 
-    #### increment concurrency
+    #### repeat
 
-    concurrency = start - 1
-    ok = True
-    while ok:
-        concurrency += 1
-        print(concurrency)
+    results = []
+    for test_index in xrange(1, repeat + 1):
+        print('Test #{test_index}'.format(test_index=test_index))
+        result = 0
+        try:
 
-        #### concurrent fetch
+            #### increment concurrency
 
-        workers = [gevent.spawn(task) for _ in xrange(concurrency)]
-        gevent.joinall(workers)
+            concurrency = start - 1
+            ok = True
+            while ok:
+                concurrency += 1
+                print(concurrency)
 
-        #### process results
+                #### concurrent fetch
 
-        for worker in workers:
+                workers = [gevent.spawn(task) for _ in xrange(concurrency)]
+                gevent.joinall(workers)
 
-            response, this_response_seconds = worker.get()
-            is_success = response.ok
-            is_quick = (this_response_seconds <= response_seconds)
+                #### process results
 
-            #### ok
+                for worker in workers:
 
-            if is_success and is_quick:
-                continue
+                    response, this_response_seconds = worker.get()
+                    is_success = response.ok
+                    is_quick = (this_response_seconds <= response_seconds)
 
-            #### not ok
+                    #### ok
 
-            if not is_quick:
-                print('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
+                    if is_success and is_quick:
+                        result = concurrency
+                        continue
 
-            if not is_success:
-                print('Failed: {status_code} {reason}'.format(status_code=response.status_code, reason=response.reason))
-                print(response.content)
+                    #### not ok
 
-            ok = False
-            break
+                    if not is_quick:
+                        print('Slow: {this_response_seconds} seconds.'.format(this_response_seconds=this_response_seconds))
+
+                    if not is_success:
+                        print('Failed: {status_code} {reason}'.format(status_code=response.status_code, reason=response.reason))
+                        print(response.content)
+
+                    ok = False
+                    break
+
+        except Exception:
+            print_exc()
+
+        finally:
+            results.append(result)
+
+    #### aggregated stats
+
+    if not results:
+        results = [0]
+
+    print('\nTests: {repeat}. Best: {best}. Average: {average}. Worst: {worst}.'.format(
+        repeat=repeat,
+        best=max(results),
+        average=int(ceil(float(sum(results)) / len(results))),
+        worst=min(results),
+    ))
 
 #### main
 
@@ -86,6 +115,7 @@ MIT License, see http://opensource.org/licenses/MIT
 ''',
         formatter_class=RawTextHelpFormatter,
     )
+    args_parser.add_argument('--repeat', type=int, default=1, help='Number of times to repeat the test, showing aggregated stats in the end. Default: 1.')
     args_parser.add_argument('--start', type=int, default=1, help='Number of concurrent requests to start with. Default: 1.')
     args_parser.add_argument('--response-seconds', type=float, default=1, help='Maximal response time in seconds for each request to pass the test. Default: 1.')
     args_parser.add_argument('--header', action='append', help="Additional headers, e.g. --header='Content-Type: application/json' --header='X-Name: Value'.")
