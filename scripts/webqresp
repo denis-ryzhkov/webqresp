@@ -7,7 +7,6 @@ def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, me
     #### import
 
     import gevent, time
-    from math import ceil
     from requests import request
     from traceback import print_exc
 
@@ -19,7 +18,7 @@ def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, me
             name, value = name_value.split(':', 1)
         except ValueError:
             exit("Invalid header: '{header}'".format(header=name_value))
-        headers[name] = value
+        headers[name.strip()] = value.strip()
 
     #### task
 
@@ -62,7 +61,6 @@ def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, me
                     #### ok
 
                     if is_success and is_quick:
-                        result = concurrency
                         continue
 
                     #### not ok
@@ -76,6 +74,9 @@ def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, me
 
                     ok = False
                     break
+
+                if ok:
+                    result = concurrency
 
         except Exception:
             print_exc()
@@ -91,7 +92,7 @@ def measure(repeat=1, start=1, response_seconds=1, header=None, content=None, me
     print('\nTests: {repeat}. Best: {best}. Average: {average}. Worst: {worst}.'.format(
         repeat=repeat,
         best=max(results),
-        average=int(ceil(float(sum(results)) / len(results))),
+        average=int(round(float(sum(results)) / len(results))),
         worst=min(results),
     ))
 
@@ -111,7 +112,7 @@ Criterion:
     Maximal number of concurrent requests to the slowest URL
     while each request gets successful response within a second.
 
-webqresp version 0.1.0
+webqresp version 0.1.1
 Copyright (C) 2013 by Denis Ryzhkov <denisr@denisr.com>
 MIT License, see http://opensource.org/licenses/MIT
 ''',

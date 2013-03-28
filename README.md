@@ -4,9 +4,14 @@ webqresp
 Web load test measuring how many concurrent users will get response to their actions quickly - within a second.  
 Hence name: WEB Quick RESPonse.
 
+Install:
+```
+    sudo apt-get install --yes gcc libevent-dev python-dev python-pip
+    sudo pip install webqresp
+```
+
 Usage:
 ```
-    sudo pip install webqresp
     webqresp http://example.com/
     webqresp --repeat=3 --start=5 --response-seconds=0.5 --header='X-Name: Value' --content='{"name": "value"}' --method=POST http://example.com/some/page
 ```
@@ -39,6 +44,6 @@ Why:
     * It is not a proportion. It is not ambiguous. Once 1 second is reached or failure occurs, it stops incrementing concurrent requests and returns the result.
 * Single slowest URL is chosen to save time, because anyway "A chain is only as strong as its weakest link".
 
-webqresp version 0.1.0  
+webqresp version 0.1.1  
 Copyright (C) 2013 by Denis Ryzhkov <denisr@denisr.com>  
 MIT License, see http://opensource.org/licenses/MIT
